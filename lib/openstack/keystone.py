@@ -2,7 +2,7 @@ import argparse
 import logging
 import time
 import requests
-
+import json
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -15,7 +15,7 @@ class Keystone(object):
         self.domain=domain
         self.tenantId=''
     def getToken(self):
-        payload = "{{\r\n    \"auth\": {{\r\n        \"identity\": {{\r\n            \"methods\": [\r\n                \"password\"\r\n            ],\r\n            \"password\": {{\r\n                \"user\": {{\r\n                    \"name\": \"{user}\",\r\n                    \"domain\": {{\r\n                    \t\"name\": \"{domain}\"\r\n                    }}, \r\n                    \"password\": \"{passwd}\"\r\n                }}\r\n            }}\r\n        }},\r\n        \"scope\": {{\r\n            \"project\": {{\r\n                \"name\": \"{tenant}\",\r\n                \"domain\": {{\r\n                    \t\"name\": \"{domain}\"\r\n                    }}\r\n            }}\r\n        }}\r\n    }}\r\n}}".format(user=self.username, passwd=self.password, tenant=self.tenant, domain=self.domain)
+        payload = "{{\"auth\": {{\"identity\": {{\"methods\": [\"password\"],\"password\": {{\"user\": {{\"name\": \"{user}\",\"domain\": {{\"name\": \"{domain}\"}},\"password\": \"{passwd}\"}}}}}},\"scope\": {{\"project\": {{\"name\": \"{tenant}\",\"domain\": {{\"name\": \"{domain}\"}}}}}}}}}}".format(user=self.username, passwd=self.password, tenant=self.tenant, domain=self.domain)
         headers = {
             'Content-Type': 'application/json'
         }

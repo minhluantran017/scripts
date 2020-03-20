@@ -77,6 +77,8 @@ if __name__ == '__main__':
     logger.info("Checking image availability...")
     app_image_name = Utils.getImageName(image_type='app', product_release=product_release, build_number=build_number)
     logger.info("Checking image {0}".format(app_image_name))
-    glance=Glance(gl_url=Utils.apiEndpoints[args.cloud]["glance"],auth_token=token)
-    print(glance.findImage("sbc-V08.01.00A011-connexip-os_07.01.01-A011_351_amd64.qcow2"))
-    #glance.listImage()
+    glance=Glance(glance_url=Utils.apiEndpoints[args.cloud]["glance"],auth_token=token)
+    app_image_id=glance.findImage(app_image_name)
+    if app_image_id == null :
+        logger.error("Image is not available now. Please upload and try again!")
+

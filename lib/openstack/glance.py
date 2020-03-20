@@ -8,8 +8,8 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger(__name__)
 
 class Glance(object):
-    def __init__(self,gl_url,auth_token):
-        self.url=gl_url
+    def __init__(self,glance_url,auth_token):
+        self.url=glance_url
         self.auth_token=auth_token
 
     def findImage(self, image_name):
