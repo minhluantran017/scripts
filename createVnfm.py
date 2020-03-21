@@ -1,15 +1,10 @@
 #!/usr/bin/python
-
 import argparse
 import logging
 import time
 import sys
-from lib.openstack.keystone import Keystone
-from lib.openstack.heat import Heat
-from lib.openstack.glance import Glance
-from lib.openstack.neutron import Neutron
-from lib.openstack.nova import Nova
-from lib.common.utils import *
+from prorietary.general_info import General
+from lib.openstack.openstack import Utils
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.DEBUG)
@@ -23,11 +18,10 @@ def parseArgs():
                             help='The cloud to create VNFM')
     parser.add_argument('-t', '--tenant',   type=str,   required=True,
                             help='The tenant to create VNFM')
-    parser.add_argument('-n', '--name',     type=str,   required=False,
-                            help='The VNFM name you want to create',
-                            default='VNFM_'+ time.strftime("%Y-%m-%d-%H-%M-%S"))
+    parser.add_argument('-n', '--name',     type=str,   required=True,
+                            help='The VNFM name you want to create')
     parser.add_argument('-u', '--user',     type=str,   required=False,
-                            help='The tenant user name',
+                            help='The tenant username',
                             default='vnfmsv')
     parser.add_argument('-p', '--password', type=str,   required=False,
                             help='The tenant password',
@@ -51,17 +45,16 @@ def parseArgs():
                             choices=['HA', 'GR'],
                             default='HA')
     return parser.parse_args()
+
 if __name__ == '__main__':
     args = parseArgs()
     logger.info("Creating VNFM {mode} with name '{name}' on tenant {tenant}..."
             .format(mode=args.mode, name=args.name, tenant=args.tenant))
     logger.info("Getting authentication with keystone URL {url}..."
-            .format(url=Utils.apiEndpoints[args.cloud]["keystone"]))
-
-    keystone=Keystone(ks_url=Utils.apiEndpoints[args.cloud]["keystone"], 
-                        tenant=args.tenant, username=args.user, password=args.password, domain=args.domain)
-    token=keystone.getToken()
-
+            .format(url=General.cloud_endpoint[args.cloud]))    
+    session = Utils.getAuthSession(url=General.cloud_endpoint[args.cloud],
+                        tenant=args.tenant,
+                        user=args.user, passwd=args.password, domain='Default')
     logger.info("Getting build info...")
     if args.release == '':
         product_release = 'mainline'
@@ -77,8 +70,24 @@ if __name__ == '__main__':
     logger.info("Checking image availability...")
     app_image_name = Utils.getImageName(image_type='app', product_release=product_release, build_number=build_number)
     logger.info("Checking image {0}".format(app_image_name))
-    glance=Glance(glance_url=Utils.apiEndpoints[args.cloud]["glance"],auth_token=token)
-    app_image_id=glance.findImage(app_image_name)
+    app_image_id=Utils.findImageOnCloud(session, app_image_name)
     if app_image_id == null :
         logger.error("Image is not available now. Please upload and try again!")
+        exit 1
 
+    db_image_name = Utils.getImageName(image_type='db', product_release=product_release, build_number=build_number)
+    logger.info("Checking image {0}".format(db_image_name))
+    db_image_id=Utils.findImageOnCloud(session, db_image_name)
+    if db_image_id == null :
+        logger.error("Image is not available now. Please upload and try again!")
+        exit 1
+    
+    lb_image_name = Utils.getImageName(image_type='lb', product_release=product_release, build_number=build_number)
+    logger.info("Checking image {0}".format(lb_image_name))
+    lb_image_id=Utils.findImageOnCloud(session, lb_image_name)
+    if lb_image_id == null :
+        logger.error("Image is not available now. Please upload and try again!")
+        exit 1
+
+    
+    
