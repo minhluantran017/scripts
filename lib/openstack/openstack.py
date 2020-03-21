@@ -37,6 +37,8 @@ class Utils:
             cmd='curl -sS -o {wp}/tmp/{build}/{pattern}.yaml "{url}/{rel}/Artifacts/{build}/heatTemplates/{pattern}*.yaml"'.format( wp=WORKSPACE, build=build_number,url=General.VNFM_ARTIFACTORY_URL, rel=product_release, pattern=General.GR_HEAT_TEMPLATE_PATTERN)
             subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True).communicate()
 
+        return '{wp}/tmp/{build}/{pattern}.yaml'.format(wp=WORKSPACE, build=build_number,pattern=General.GR_HEAT_TEMPLATE_PATTERN)
+
     def getAuthSession(url, tenant, user, passwd, domain='Default'):
         loader = loading.get_plugin_loader('password')
         auth = loader.load_from_options(auth_url=url, project_name=tenant
@@ -61,8 +63,6 @@ class Utils:
         ----------
         name : str
             The name of the stack
-        tenant_id : str
-            The tenant (project) ID
         heat_template : str
             The Heat Orchestration Template for creating stack
         parameters : dict

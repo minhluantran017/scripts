@@ -15,7 +15,8 @@ def parseArgs():
         usage='Create a HA/GR VNFM instance',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-c', '--cloud',    type=str,   required=True,
-                            help='The cloud to create VNFM')
+                            help='The cloud to create VNFM',
+                            choices=['OTT-PC2', 'PLA-PC2', 'WFD-PC2'])
     parser.add_argument('-t', '--tenant',   type=str,   required=True,
                             help='The tenant to create VNFM')
     parser.add_argument('-n', '--name',     type=str,   required=True,
@@ -44,6 +45,9 @@ def parseArgs():
                             help='Create HA/GR VNFM',
                             choices=['HA', 'GR'],
                             default='HA')
+    parser.add_argument('', '--prov',   type=bool, required=False,
+                            help='Provider or floating network',
+                            default=False)
     return parser.parse_args()
 
 if __name__ == '__main__':
@@ -67,8 +71,12 @@ if __name__ == '__main__':
         build_number = args.build
     logger.info("Build number: {0}".format(build_number))
 
+    logger.info("Downloading Heat template...")
+    heat_template = Utils.downloadHeatTemplate(topology=args.mode, product_release, build_number)
+
     logger.info("Checking image availability...")
     app_image_name = Utils.getImageName(image_type='app', product_release=product_release, build_number=build_number)
+    
     logger.info("Checking image {0}".format(app_image_name))
     app_image_id=Utils.findImageOnCloud(session, app_image_name)
     if app_image_id == null :
@@ -89,5 +97,28 @@ if __name__ == '__main__':
         logger.error("Image is not available now. Please upload and try again!")
         exit 1
 
+    if args.cloud == 'OTT-PC2':
+        external_net='External OAM-V4'
+    else:
+        external_net='EXT_RTP_0_V4'
+
+    pub_key=subprocess.Popen('cat {wp}/keypairs/openstack.pub'.format(wp=Utils.WORKSPACE), stdout=subprocess.PIPE, shell=True).communicate()[0].decode("utf-8")
     
+    logger.info("Creating stack...")
+    parameters={
+        "availability_zone": "general",
+        "app_image_id": app_image_id,
+        "db_image_id": db_image_id,
+        "lb_image_id": lb_image_id,
+        "ipv4_floating_network": not(args.prov),
+        "ipv4_provider_network": args.prov,
+        "ipv6_provider_network": "false",
+        "public_net_v4" external_net,
+        "public_net_v4_subnet_id" : "1111",
+        "public_net_v6": external_net,
+        "public_net_v6_subnet_id": "1111",
+        "vnfm_public_key": pub_key,
+        "dns_servers=": ["10.2.1.2"]
+    }
+    stack_id=Utils.createStack(session, args.name, heat_template, parameters)
     
