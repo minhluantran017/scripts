@@ -3,7 +3,7 @@ import argparse
 import logging
 import time
 import sys
-from prorietary.general_info import General
+from proprietary.general_info import General
 from lib.openstack.openstack import Utils
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -81,21 +81,21 @@ if __name__ == '__main__':
     app_image_id=Utils.findImageOnCloud(session, app_image_name)
     if app_image_id == null :
         logger.error("Image is not available now. Please upload and try again!")
-        exit 1
+        exit()
 
     db_image_name = Utils.getImageName(image_type='db', product_release=product_release, build_number=build_number)
     logger.info("Checking image {0}".format(db_image_name))
     db_image_id=Utils.findImageOnCloud(session, db_image_name)
     if db_image_id == null :
         logger.error("Image is not available now. Please upload and try again!")
-        exit 1
+        exit()
     
     lb_image_name = Utils.getImageName(image_type='lb', product_release=product_release, build_number=build_number)
     logger.info("Checking image {0}".format(lb_image_name))
     lb_image_id=Utils.findImageOnCloud(session, lb_image_name)
     if lb_image_id == null :
         logger.error("Image is not available now. Please upload and try again!")
-        exit 1
+        exit()
 
     if args.cloud == 'OTT-PC2':
         external_net='External OAM-V4'

@@ -4,7 +4,7 @@ import logging
 import time
 import yaml
 
-from propietary.general_info import General
+from proprietary.general_info import General
 
 from keystoneauth1 import loading
 from keystoneauth1 import session
