@@ -6,34 +6,56 @@ source $WORKSPACE/lib/openstack/openstack.sh
 
 echo "$INFO $(date)"
 
-if [ -z "$1" ] || [ "$1" == "help" ]; then
+function printHelp {
     echo 'Script for setting up a VNFM HA.'
     echo 'Usage:'
-    echo "    $0 <cloud_name> <tenant_name> <stack_name> <network_type>"
+    echo "    $0 --cloud <cloud_name> --tenant <tenant_name> --name <stack_name> <network_type>"
     echo 'Parameters:'
-    echo '    <cloud_name>     : (required) OTT-PC2 | PLA-PC2 | WFD-PC2'
-    echo '    <tenant_name>    : (required) your Openstack tenant name'
-    echo '    <stack_name>     : (required) your stack name. Only use characters, digits, and _ or -'
-    echo '    <network_type>   : (optional) floating | provider. Default to floating'
+    echo '    -c, --cloud    <cloud_name>       : (required) OTT-PC2 | PLA-PC2 | WFD-PC2'
+    echo '    -t, --tenant   <tenant_name>      : (required) your Openstack tenant name'
+    echo '    -n, --name     <stack_name>       : (required) your stack name. Only use characters, digits, and _ or -'
+    echo '    -p, --prov                        : (optional) deploy with provider network? Default to false'
+    echo 'Options:'
+    echo '    -V, --version                     : Print script version'
+    echo '    -h, --help                        : Print this help'
     echo 'Examples:'
-    echo "    $0 OTT-PC2 OTT.PC2.SV.VNFM.SANITY VNFM-Test-1 floating"
-    echo "    $0 PLA-PC2 PLA.PC2.SV.VNFM.HA VNFM-Test-2 provider"
-    echo "    $0 WFD-PC2 WFD.PC2.VNFM.JENKINS VNFM-Test-3 provider"
+    echo "    $0 -c OTT-PC2 -t OTT.PC2.SV.VNFM.SANITY   -n VNFM-Test-1"
+    echo "    $0 -c PLA-PC2 -t PLA.PC2.SV.VNFM.HA       -n VNFM-Test-2 --prov"
+    echo "    $0 -c WFD-PC2 -t WFD.PC2.VNFM.JENKINS     -n VNFM-Test-3 --prov"
     exit 128
+}
+
+if [ -z "$1" ]; then
+    printHelp
 fi
 
 echo "$INFO Setting environments..."
-CLOUD="$1"
-TENANT="$2"
-PROVIDER="$4"
+while [[ "$1" =~ ^- && ! "$1" == "--" ]]; do case $1 in
+    -V | --version )
+        echo "There is no version until now :)"
+        exit
+        ;;
+    -h | --help )
+        printHelp
+        exit
+        ;;
+    -c | --cloud )
+        shift; CLOUD="$1"
+        ;;
+    -t | --tenant )
+        shift; TENANT="$1"
+        ;;
+    -n | --name )
+        shift; TOPOLOGY_NAME="$1"
+        ;;
+    -p | --prov )
+        PROVIDER=1;
+        ;;
+esac; shift; done
+if [[ "$1" == '--' ]]; then shift; fi
+
 ZONE="general"
 PRODUCT_RELEASE="mainline"
-
-if [ -z "$3" ]; then
-    TOPOLOGY_NAME="VNFM_HA_AUTO"
-else
-    TOPOLOGY_NAME="$3"
-fi
 
 if [ "$CLOUD" == "PLA-PC2" ]; then
     EXTERNAL_NETWORK_NAME_1="EXT_RTP_0_V4"
