@@ -4,11 +4,12 @@ YEL=$'\e[1;33m'
 MAG=$'\e[1;35m'
 WHI=$'\e[0m'
 TEMPDIR=${TEMPDIR:=$(mktemp)}
-function info() { echo ${BLU}INFO: $1${WHI}; }
-function warn() { echo ${YEL}WARN: $1${WHI}; }
-function err() { echo ${RED}ERR: $1${WHI}; }
+function info() { echo $'\e[1;32m'INFO:$'\e[0m' $1; }
+function warn() { echo $'\e[1;33m'WARN:$'\e[0m' $1; }
+function err() { echo $'\e[1;31m'ERR:$'\e[0m' $1; }
+function debug() { echo $'\e[1;34m'DEBUG:$'\e[0m' $1; }
 
-function welcome() {
+function print_welcome() {
     echo "  _______________________________________________________"
     echo " / ${RED}Hello my friend, welcome to my scripts!${WHI}               \\"
     echo "/ ${BLU}These small script may make your Dev/DevOps life easier.${WHI}\\"
@@ -41,9 +42,9 @@ function create_binaries() {
     do
         shortcut=`echo $filename | sed  's/.sh\|.py$//g'`
         if [[ -e /usr/local/bin/$shortcut ]]; then warn "File existed: $shortcut. Overwritting..."; fi
-        sudo rm -f /usr/local/bin/$shortcut
-        sudo cp $TEMPDIR/$filename /usr/local/bin/$shortcut
-        sudo chmod +x /usr/local/bin/$shortcut
+        rm -f /usr/local/bin/$shortcut
+        cp $TEMPDIR/$filename /usr/local/bin/$shortcut
+        chmod +x /usr/local/bin/$shortcut
         echo "    $filename --> /usr/local/bin/$shortcut"
     done
 }
@@ -52,8 +53,15 @@ function clean_stuffs() {
     rm -rf $TEMPDIR
 }
 
-welcome
+function what_is_next() {
+    info "Now, what is next?"
+    echo " - Configure Jenkins credentials:"
+    echo "    $ jenkins-cli configure"
+}
+
+print_welcome
 check_requirement
 checkout_code
 create_binaries
 clean_stuffs
+what_is_next

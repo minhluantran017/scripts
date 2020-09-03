@@ -1,8 +1,9 @@
 #!/bin/bash
 function get_jenkins_cred() {
-    PROFILE=$2
-    PROFILE=${PROFILE:=default}
-    sed -nr "/^\[$PROFILE\]/ { :l /^$1[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" $HOME/.jenkins/config
+    local l_item=$1
+    local l_profile=$2
+    l_profile=${l_profile:=default}
+    sed -nr "/^\[$l_profile\]/ { :l /^$l_item[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" $HOME/.jenkins/config
 }
 
 JENKINS_URL=${JENKINS_URL:=$(get_jenkins_cred JENKINS_URL)}
