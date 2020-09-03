@@ -1,27 +1,5 @@
 if [[ -z $WORKSPACE ]]; then WORKSPACE=`dirname $0/../..`; fi
 
-function sourceTenant {
-    if [[ $# -ne 2 ]]; then return 1 ; fi
-    local CLOUD="$1"
-    local TENANT="$2"
-    local AUTHEN_FILE=$WORKSPACE/proprietary/$CLOUD/$TENANT-openrc.sh
-    if [[ -f $AUTHEN_FILE ]]
-    then
-        source $AUTHEN_FILE
-    else
-        echo "File not found. Using user input..."
-        echo "Input username and press Enter:"
-        read -r OS_USERNAME
-        echo "Input password (silent mode) and press Enter:"
-        read -sr OS_PASSWORD
-        export OS_AUTH_URL="${cloud_endpoint[$CLOUD]}"
-        export OS_PROJECT_NAME=$TENANT
-        export OS_USERNAME=$OS_USERNAME
-        export OS_PASSWORD=$OS_PASSWORD
-        export OS_DOMAIN_NAME='Default'
-        export OS_DOMAIN_ID='default'
-    fi
-}
 
 function getVnfmLastSuccesfulBuild {
     if [[ $# -ne 1 ]]; then return 1 ; fi
