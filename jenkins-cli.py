@@ -7,6 +7,7 @@ import sys
 import urllib3
 import os
 import configparser
+import cmd
 from os import path
 
 def parse_args():
@@ -20,10 +21,12 @@ def parse_args():
                             help='Your Jenkins username')
     parser.add_argument('-p', '--password', type=str,   required=False,
                             help='Your Jenkins password or API token')
-    parser.add_argument('-profile', type=str,   required=False,
+    parser.add_argument('--profile', type=str,   required=False,
                             help='The Jenkins profile name in Jenkins config file')
 
     subparsers = parser.add_subparsers(help='sub-command', dest='subcommand')
+
+    parser_configure = subparsers.add_parser('configure', help='Configure Jenkins access information')
 
     parser_validate = subparsers.add_parser('validate', help='Validate a jenkinsfile')
 
@@ -40,6 +43,20 @@ def parse_args():
                             help='The Jenkins job parameters to build')
 
     return parser.parse_args()
+
+def configure_cred():
+    jenkins_url = input("Input Jenkins URL: ")
+    jenkins_user = input("Input Jenkins user: ")
+    jenkins_token = input("Input Jenkins API token/password: ")
+    jenkins_profile = 'default' if (args.profile == None) else args.profile
+    jenkins_config = configparser.ConfigParser()
+    jenkins_config[jenkins_profile] = {
+        'JENKINS_URL': jenkins_url,
+        'JENKINS_USER': jenkins_user,
+        'JENKINS_API_TOKEN': jenkins_token
+    }
+    with open('{}/.jenkins/config'.format(os.environ.get('HOME')), 'a') as config_file:
+        jenkins_config.write(config_file)
 
 def get_jenkins_cred():
     logger.info("Getting Jenkins credentials...")
@@ -122,10 +139,11 @@ if __name__ == '__main__':
     logger = logging.getLogger(__name__)
     logging.getLogger("urllib3").setLevel(logging.INFO)
 
-    jenkins_cred = get_jenkins_cred()
-    if args.subcommand == 'validate':
-        validate_jenkinsfile(jenkins_cred, args.file)
+    if args.subcommand == 'configure':
+        configure_cred()
+    elif args.subcommand == 'validate':
+        validate_jenkinsfile(get_jenkins_cred(), args.file)
     elif args.subcommand == 'build':
-        build_job(jenkins_cred, args.job, args.parameters)
+        build_job(get_jenkins_cred(), args.job, args.parameters)
 
 
