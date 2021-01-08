@@ -55,8 +55,6 @@ function clean_stuffs() {
 
 function what_is_next() {
     info "Now, what is next?"
-    echo " - Configure Jenkins credentials:"
-    echo "    $ jenkins-cli configure"
 }
 
 print_welcome

@@ -15,7 +15,7 @@ Now feel free to investigate!
 
 You should have these tool to run my scripts:
 * Git
-* Python 3
+* cURL
 * (TBD...)
 
 ## Configuration instruction
@@ -24,8 +24,12 @@ After running the `quickstart.sh` script above, you now can jump to below items:
 
 #### Jenkins
 
-You should have a Jenkins config file (same as the AWS config file if you are familiar with)
+You should have a Jenkins `config` file (same as the AWS config file if you are familiar with)
 under `$HOME/.jenkins` directory:
-```sh
-jenkins-cli configure
+
+```ini
+[default]
+JENKINS_URL=https://jenkins.example.com
+JENKINS_USER=tommy
+JENKINS_API_TOKEN=1a2b3c4d5e6f
 ```
