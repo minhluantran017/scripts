@@ -3,7 +3,7 @@ BLU=$'\e[1;32m'
 YEL=$'\e[1;33m'
 MAG=$'\e[1;35m'
 WHI=$'\e[0m'
-TEMPDIR=${TEMPDIR:=$(mktemp -d)}
+TEMPDIR=$(mktemp -d)
 function info() { echo $'\e[1;32m'INFO:$'\e[0m' $1; }
 function warn() { echo $'\e[1;33m'WARN:$'\e[0m' $1; }
 function err() { echo $'\e[1;31m'ERR:$'\e[0m' $1; }
