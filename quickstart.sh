@@ -32,7 +32,7 @@ function check_requirement() {
 
 function checkout_code() {
     info "Checking out my code from GitHub..."
-    git checkout --quiet https://github.com/minhluantran017/scripts.git $TEMPDIR
+    git clone --quiet https://github.com/minhluantran017/scripts.git $TEMPDIR
 }
 
 function create_binaries() {
